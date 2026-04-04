@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>Asset Control System</title>
+
+<!-- PWA iOS -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="ACS"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)"/>
+
+<!-- Icons -->
+<link href="logo(3).png" rel="apple-touch-icon"/>
+<link href="logo(3).png" rel="apple-touch-icon" sizes="152x152"/>
+<link href="logo(3).png" rel="apple-touch-icon" sizes="167x167"/>
+<link href="logo(3).png" rel="apple-touch-icon" sizes="180x180"/>
+<link rel="icon" href="logo(3).png"/>
+
+<!-- Manifest -->
+<link rel="manifest" href="manifest.json"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 固定標題列 -->
+<div class="header">
+  <button class="back-button" id="back-button">
+    <svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 18L9 12L15 6" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+    </svg>
+  </button>
+  <h1 id="page-title">總覽頁面</h1>
+</div>
+
+<!-- 開啟畫面 -->
+<div id="splash">
+  <img alt="Logo" src="logo(3).png"/>
+  <h1>Asset Control System</h1>
+  <div id="install-hint">
+    <p style="font-size:18px;font-weight:bold;line-height:4;">📲 請將此網站加到主畫面</p>
+    <p style="font-size:16px;color:#666;line-height:2;">在瀏覽器選單中點選「加入主畫面」<br/>需安裝成 App 才可使用</p>
+  </div>
+  <div id="offline-hint">
+    <p style="font-size:16px;color:#e74c3c;">請檢查網路狀態</p>
+  </div>
+</div>
+
+<!-- 總覽頁面 -->
+<div id="app" class="page overview-page">
+  <div class="page-topbar overview-topbar">
+    ACS
+    <div class="topbar-right">
+      <button class="topbar-icon-btn" id="openWorkspaceBtn" title="工作台">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+          <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="overview-balance">
+    <div class="overview-balance-head">
+      <div class="label">資產總額</div>
+      <div class="updated" id="overview-updated">動態更新：--</div>
+    </div>
+    <div class="amount">NT$ <span id="total-nt">1,146,550</span></div>
+    <div class="delta">未實現損益 <span>--</span></div>
+  </div>
+
+  <div class="overview-maincard">
+    <div class="donut-wrap"><canvas id="assetDonut"></canvas></div>
+    <div class="legend" id="assetLegend">
+      <div class="legend-row" data-key="CRYPTO">
+        <div class="legend-left"><span class="dot c1"></span><span class="name">加密貨幣</span></div>
+        <div class="legend-right"><span class="pct">--</span></div>
+      </div>
+      <div class="legend-row" data-key="ETF">
+        <div class="legend-left"><span class="dot c2"></span><span class="name">ETF/股票</span></div>
+        <div class="legend-right"><span class="pct">--</span></div>
+      </div>
+      <div class="legend-row" data-key="METAL">
+        <div class="legend-left"><span class="dot c3"></span><span class="name">貴金屬</span></div>
+        <div class="legend-right"><span class="pct">--</span></div>
+      </div>
+      <div class="legend-row" data-key="FIAT">
+        <div class="legend-left"><span class="dot c4"></span><span class="name">現金</span></div>
+        <div class="legend-right"><span class="pct">--</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overview-grid">
+    <div class="mini-card" style="--card-color:#f5a623;" data-cat="CRYPTO">
+      <div class="mini-top"><div class="mini-top-left"><div class="mini-top-icon">₿</div><div class="mini-top-title">加密貨幣</div></div></div>
+      <div class="mini-body">
+        <div class="mini-amt" id="cat-amt-CRYPTO">NT$ 0</div>
+        <div class="mini-sub"><span id="cat-pct-CRYPTO">0%</span><span class="mini-change" id="cat-chg-CRYPTO">--</span></div>
+      </div>
+    </div>
+    <div class="mini-card" style="--card-color:#7396c6;" data-cat="ETF">
+      <div class="mini-top"><div class="mini-top-left"><div class="mini-top-icon">TW</div><div class="mini-top-title">ETF/股票</div></div></div>
+      <div class="mini-body">
+        <div class="mini-amt" id="cat-amt-ETF">NT$ 0</div>
+        <div class="mini-sub"><span id="cat-pct-ETF">0%</span><span class="mini-change" id="cat-chg-ETF">--</span></div>
+      </div>
+    </div>
+    <div class="mini-card" style="--card-color:#dfb199;" data-cat="METAL">
+      <div class="mini-top"><div class="mini-top-left"><div class="mini-top-icon">Au</div><div class="mini-top-title">貴金屬</div></div></div>
+      <div class="mini-body">
+        <div class="mini-amt" id="cat-amt-METAL">NT$ 0</div>
+        <div class="mini-sub"><span id="cat-pct-METAL">0%</span><span class="mini-change" id="cat-chg-METAL">--</span></div>
+      </div>
+    </div>
+    <div class="mini-card" style="--card-color:#9eb995;" data-cat="FIAT">
+      <div class="mini-top"><div class="mini-top-left"><div class="mini-top-icon">$</div><div class="mini-top-title">現金</div></div></div>
+      <div class="mini-body">
+        <div class="mini-amt" id="cat-amt-FIAT">NT$ 0</div>
+        <div class="mini-sub"><span id="cat-pct-FIAT">0%</span><span class="mini-change" id="cat-chg-FIAT">--</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行情區塊 -->
+  <div class="market-section">
+    <div class="market-section-title">市場行情</div>
+    <div class="market-card" id="market-card-body">
+      <div class="market-header-row">
+        <span class="mh-icon-placeholder"></span>
+        <span class="mh-name">商品</span>
+        <span class="mh-price">最新價格</span>
+        <span class="mh-change">P/L%</span>
+        <span class="mh-avg">持有均價</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="rebalance" class="page">
+  <div class="page-topbar">再平衡安全</div>
+
+  <!-- 狀態標頭 -->
+  <div class="rb-header">
+    <div class="rb-shield safe" id="rb-shield">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6l-8-4z" fill="#77a478" opacity="0.3"/>
+        <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6l-8-4z" stroke="#77a478" stroke-width="1.5" fill="none"/>
+        <path d="M9 12l2 2 4-4" stroke="#77a478" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="rb-title" id="rb-title">目前資產配置安全平衡</div>
+    <div class="rb-subtitle" id="rb-subtitle">所有資產占比均在 15 – 35% 的目標範圍內，暫無需要調整。</div>
+  </div>
+
+  <!-- 資產狀況卡片 -->
+  <div class="rb-section-label">資產狀況</div>
+  <div class="rb-card" id="rb-main-card">
+    <div class="rb-alert-row">
+      <div class="rb-alert-name" id="rb-alert-name">資產總值 NT$ 500,000</div>
+      <div class="rb-alert-badge safe" id="rb-alert-badge">安全範圍</div>
+    </div>
+
+    <!-- 四格圓圈 -->
+    <div class="rb-grid" id="rb-grid">
+      <div class="rb-mini">
+        <div class="rb-ring-wrap">
+          <canvas id="rb-ring-CRYPTO" width="64" height="64"></canvas>
+          <div class="rb-ring-label" id="rb-rlabel-CRYPTO">0%</div>
+        </div>
+        <div class="rb-mini-range">15 ~ 35%</div>
+        <div class="rb-mini-name">加密貨幣</div>
+      </div>
+      <div class="rb-mini">
+        <div class="rb-ring-wrap">
+          <canvas id="rb-ring-ETF" width="64" height="64"></canvas>
+          <div class="rb-ring-label" id="rb-rlabel-ETF">0%</div>
+        </div>
+        <div class="rb-mini-range">15 ~ 35%</div>
+        <div class="rb-mini-name">ETF/股票</div>
+      </div>
+      <div class="rb-mini">
+        <div class="rb-ring-wrap">
+          <canvas id="rb-ring-METAL" width="64" height="64"></canvas>
+          <div class="rb-ring-label" id="rb-rlabel-METAL">0%</div>
+        </div>
+        <div class="rb-mini-range">15 ~ 35%</div>
+        <div class="rb-mini-name">貴金屬</div>
+      </div>
+      <div class="rb-mini">
+        <div class="rb-ring-wrap">
+          <canvas id="rb-ring-FIAT" width="64" height="64"></canvas>
+          <div class="rb-ring-label" id="rb-rlabel-FIAT">0%</div>
+        </div>
+        <div class="rb-mini-range">15 ~ 35%</div>
+        <div class="rb-mini-name">現金</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rb-suggestions" style="display:none; width:100%; flex-direction:column; gap:8px;"></div>
+
+  <div class="rb-footer-note" id="rb-footer-note">
+    系統持續監測中，若有任何異動，請立即進行調整。
+  </div>
+  <div class="rb-timestamp" id="rb-timestamp">最後更新時間・--</div>
+
+</div>
+
+<!-- 歷史紀錄 -->
+<div id="history" class="page">
+  <div class="page-topbar">
+    <span>歷史紀錄</span>
+    <div class="topbar-right">
+      <button id="history-refresh-btn" style="background:transparent;border:none;cursor:pointer;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <svg id="history-refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" fill="#1E2A38"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 時間篩選 -->
+  <div id="history-filter" style="display:flex;gap:8px;margin-bottom:14px;justify-content:center;align-items:center;">
+    <button class="hist-filter-btn active" data-days="7">7天</button>
+    <button class="hist-filter-btn" data-days="30">30天</button>
+    <button class="hist-filter-btn" data-days="90">90天</button>
+    <button class="hist-filter-btn" data-days="0">全部</button>
+    <button class="hist-filter-btn" data-days="custom" id="hist-custom-btn">自訂</button>
+  </div>
+  <!-- 自訂日期區間 -->
+  <div id="hist-custom-range" style="display:none;gap:8px;margin-bottom:14px;align-items:center;">
+    <div class="hist-date-input-wrap" id="hist-from-wrap" onclick="openDatePicker('from')">
+      <span class="hist-date-display placeholder" id="hist-from-display">選擇日期</span>
+    </div>
+    <span style="color:#aaa;font-size:13px;flex-shrink:0;">至</span>
+    <div class="hist-date-input-wrap" id="hist-to-wrap" onclick="openDatePicker('to')">
+      <span class="hist-date-display placeholder" id="hist-to-display">選擇日期</span>
+    </div>
+  </div>
+
+  <!-- 自訂月曆浮窗 -->
+  <div id="hist-cal-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeDatePicker()">
+    <div id="hist-cal-inner" style="position:absolute;left:0;right:0;bottom:0;border-radius:24px 24px 0 0;padding:24px 20px 36px;" class="hist-cal-inner">
+      <!-- 標題列 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <button onclick="calNav(-1)" class="hist-cal-nav-btn">‹</button>
+        <span id="hist-cal-title" class="hist-cal-title-btn" onclick="toggleMonthPicker()"></span>
+        <button onclick="calNav(1)" class="hist-cal-nav-btn">›</button>
+      </div>
+      <!-- 月份選擇器 -->
+      <div id="hist-month-picker" style="display:none;margin-bottom:8px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="hist-month-grid"></div>
+      </div>
+      <!-- 星期標題 -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:8px;" id="hist-cal-weekrow">
+        <span class="hist-cal-wday">日</span><span class="hist-cal-wday">一</span><span class="hist-cal-wday">二</span>
+        <span class="hist-cal-wday">三</span><span class="hist-cal-wday">四</span><span class="hist-cal-wday">五</span>
+        <span class="hist-cal-wday">六</span>
+      </div>
+      <div id="hist-cal-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;"></div>
+      <button onclick="closeDatePicker()" class="hist-cal-cancel-btn">取消</button>
+    </div>
+  </div>
+
+  <!-- 載入狀態 -->
+  <div id="history-loading" style="display:none;text-align:center;padding:40px 0;color:#aaa;font-size:14px;">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="animation:spin 1s linear infinite;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto;">
+      <circle cx="12" cy="12" r="10" stroke="#ddd" stroke-width="2"/>
+      <path d="M12 2a10 10 0 0 1 10 10" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div>讀取中...</div>
+  </div>
+
+  <!-- 未綁定提示 -->
+  <div id="history-no-bind" style="display:none;text-align:center;padding:40px 16px;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="margin-bottom:12px;opacity:0.3;">
+      <rect x="3" y="3" width="18" height="18" rx="3" stroke="#888" stroke-width="2"/>
+      <path d="M8 10h8M8 14h5" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p style="color:#aaa;font-size:14px;">尚未綁定 Google Sheet</p>
+    <p style="color:#bbb;font-size:12px;margin-top:4px;">請先至設定頁完成綁定</p>
+  </div>
+
+  <!-- 無資料提示 -->
+  <div id="history-empty" style="display:none;text-align:center;padding:40px 16px;">
+    <p style="color:#aaa;font-size:14px;">尚無任何交易紀錄</p>
+  </div>
+
+  <!-- 紀錄列表 -->
+  <div id="history-list"></div>
+</div>
+
+<!-- 交易 -->
+<div id="export" class="page">
+  <div class="page-topbar" style="justify-content:flex-end;gap:8px;">
+    <div class="trade-search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="#888" stroke-width="2"/>
+        <path d="M16.5 16.5L21 21" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input class="trade-search-input" id="trade-search" type="text" placeholder="搜尋商品..."/>
+    </div>
+    <button class="trade-add-btn" id="trade-add-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 分類篩選 -->
+  <div class="trade-cat-tabs">
+    <button class="trade-cat-btn active" data-cat="ALL">全部</button>
+    <button class="trade-cat-btn" data-cat="加密貨幣">加密貨幣</button>
+    <button class="trade-cat-btn" data-cat="ETF/股票">ETF/股票</button>
+    <button class="trade-cat-btn" data-cat="貴金屬">貴金屬</button>
+    <button class="trade-cat-btn" data-cat="現金">現金</button>
+  </div>
+
+  <!-- 欄位標題 -->
+  <div class="trade-list-header">
+    <span class="tlh-name">商品 / 持有數量</span>
+    <span class="tlh-avg">P/L%</span>
+    <span class="tlh-total">現有價值</span>
+  </div>
+
+  <!-- 資產卡片列表 -->
+  <div class="trade-list" id="trade-list"></div>
+</div>
+
+<!-- 交易完成 Toast -->
+<div id="trade-toast" style="
+  position:fixed; top:-160px; left:0; right:0; z-index:99999;
+  padding-top: max(env(safe-area-inset-top), 44px);
+  padding-bottom: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background:rgba(30,42,56,0.95);
+  color:#fff;
+  border-radius:0 0 20px 20px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  transition:top 0.45s cubic-bezier(0.34,1.2,0.64,1);
+  pointer-events:none;">
+  <div id="trade-toast-title" style="font-size:12px;font-weight:600;opacity:0.55;letter-spacing:0.5px;margin-bottom:6px;"></div>
+  <div id="trade-toast-body" style="font-size:16px;font-weight:700;"></div>
+</div>
+<div id="trade-confirm-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;">
+  <div id="trade-confirm-inner" style="background:#fff;border-radius:20px;padding:32px 28px;width:300px;max-width:90vw;box-shadow:0 16px 48px rgba(0,0,0,0.22);">
+    <div id="trade-confirm-title" style="font-size:18px;font-weight:800;margin-bottom:4px;color:#1E2A38;"></div>
+    <div id="trade-confirm-subtitle" style="font-size:13px;color:#aaa;margin-bottom:20px;"></div>
+    <div id="trade-confirm-body" style="font-size:14px;color:#333;line-height:2.2;margin-bottom:28px;border-top:1px solid #f0f0f0;padding-top:16px;"></div>
+    <div style="display:flex;gap:12px;">
+      <button id="trade-confirm-cancel" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid #e0e0e0;background:#f7f7f7;color:#555;font-size:15px;font-weight:600;cursor:pointer;">取消</button>
+      <button id="trade-confirm-ok" style="flex:1;padding:13px;border-radius:12px;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- 設定 -->
+<div id="settings" class="page">
+  <div class="page-topbar">設定</div>
+  <p class="section-title">顯示設定</p>
+  <div class="list-container">
+    <div class="list-row" id="theme-setting">
+      <span>主題</span>
+      <div style="display:flex;align-items:center;">
+        <span id="theme-current">系統&amp;自動</span>
+        <svg class="arrow-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+      </div>
+    </div>
+  </div>
+  <p class="section-title">資料同步</p>
+  <div class="list-container">
+    <div class="list-row" id="gsheet-setting" style="cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="18" height="18" rx="3" fill="#34a853" opacity="0.15"/>
+          <path d="M8 10h8M8 14h5" stroke="#34a853" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Google Sheet 綁定</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span id="gsheet-status-badge" class="gs-badge unbind">未綁定</span>
+        <svg class="arrow-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+      </div>
+    </div>
+  </div>
+  <p class="section-title">其他</p>
+  <div class="list-container">
+    <div class="list-row" id="about-setting" style="cursor:pointer;">
+      <span>關於</span>
+      <svg class="arrow-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+    </div>
+    <div class="list-row" id="contact-setting" style="cursor:pointer;">
+      <span>聯絡我們</span>
+      <svg class="arrow-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+    </div>
+    <div class="list-row" id="version-setting" style="cursor:pointer;">
+      <span>版本更新</span>
+      <div style="display:flex;align-items:center;">
+        <span class="value">V0.0.1</span>
+        <svg class="arrow-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 版本詳情 -->
+<div id="version-detail" class="page version-page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>版本更新</span>
+  </div>
+  <p class="brand-title">版本</p>
+  <h2 class="page-title">V0.0.1</h2>
+  <p class="section-title" style="text-align:center;">歷史版本</p>
+  <div class="list-container">
+    <div class="list-row"><span>日期: 2026-03-06</span><span class="value">V0.0.1</span></div>
+  </div>
+</div>
+
+<!-- 關於 -->
+<div id="about-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>關於</span>
+  </div>
+  <p class="brand-title">關於</p><h2 class="page-title">開發中</h2>
+</div>
+
+<!-- Google Sheet 綁定 -->
+<div id="gsheet-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>Google Sheet 綁定</span>
+  </div>
+
+  <!-- 狀態顯示 -->
+  <div class="gs-status-card" id="gs-status-card">
+    <div class="gs-status-icon" id="gs-status-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="18" height="18" rx="3" fill="#34a853" opacity="0.2"/>
+        <path d="M8 10h8M8 14h5" stroke="#34a853" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="gs-status-text">
+      <div class="gs-status-title" id="gs-status-title">尚未綁定</div>
+      <div class="gs-status-sub" id="gs-status-sub">請貼上 Apps Script 網址以開始同步</div>
+    </div>
+  </div>
+
+  <!-- 說明步驟 -->
+  <div class="gs-steps" id="gs-steps">
+    <p class="section-title" style="margin-top:16px;">設定步驟</p>
+    <div class="gs-step"><span class="gs-step-num">1</span><span>開啟你的 Google Sheet</span></div>
+    <div class="gs-step"><span class="gs-step-num">2</span><span>點選上方選單 <strong>擴充功能 → Apps Script</strong></span></div>
+    <div class="gs-step"><span class="gs-step-num">3</span><span>貼上下方程式碼並儲存</span></div>
+    <div class="gs-step"><span class="gs-step-num">4</span><span>點選 <strong>部署 → 新增部署</strong>，類型選「網頁應用程式」</span></div>
+    <div class="gs-step"><span class="gs-step-num">5</span><span>執行身分選「我」，存取權限選「所有人」</span></div>
+    <div class="gs-step"><span class="gs-step-num">6</span><span>複製部署後的網址貼到下方</span></div>
+
+    <!-- 程式碼區塊 -->
+    <div class="gs-code-wrap">
+      <div class="gs-code-header">
+        <span class="gs-code-label">Apps Script 程式碼</span>
+        <button class="gs-copy-btn" id="gs-copy-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          複製程式碼
+        </button>
+      </div>
+      <pre class="gs-code" id="gs-code-block">const SHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
+
+function jsonRes(p, obj) {
+  const json = JSON.stringify(obj);
+  if (p.callback) {
+    return ContentService
+      .createTextOutput(p.callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ===== 市場報價 =====
+function getPrices(symbols) {
+  const results = {};
+  let usdtwd = 32;
+  try {
+    const fxData = JSON.parse(UrlFetchApp.fetch('https://api.exchangerate-api.com/v4/latest/USD', { muteHttpExceptions: true }).getContentText());
+    usdtwd = fxData.rates?.TWD || 32;
+  } catch(e) {}
+
+  symbols.forEach(item => {
+    try {
+      const { symbol, type } = item;
+      if (type === 'crypto') {
+        if (symbol.toUpperCase() === 'USDT') {
+          results[symbol] = { price: Math.round(usdtwd * 100) / 100 };
+        } else {
+          const pair = symbol.toUpperCase() + '-USDT';
+          const url  = 'https://www.okx.com/api/v5/market/ticker?instId=' + pair;
+          const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+          const data = JSON.parse(res.getContentText());
+          const priceUsdt = parseFloat(data.data?.[0]?.last);
+          results[symbol] = { price: priceUsdt ? Math.round(priceUsdt * usdtwd) : null };
+        }
+      } else if (type === 'gold_tw') {
+        // 黃金存摺牌價估算：GC=F (USD/盎司) 換算成 NT$/公克
+        // 台銀牌價 ≈ 國際金價 × 匯率 ÷ 31.1035（盎司→克）
+        const url  = 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d';
+        const data = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText());
+        const priceUsdPerOz = data.chart?.result?.[0]?.meta?.regularMarketPrice || null;
+        if (priceUsdPerOz) {
+          const ntdPerGram = Math.round(priceUsdPerOz * usdtwd / 31.1035);
+          results[symbol] = { price: ntdPerGram };
+        } else {
+          results[symbol] = { price: null };
+        }
+      } else if (type === 'metal_usd') {
+        // 國際黃金 GC=F（USD/盎司）轉台幣
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=1d&range=1d';
+        const data = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText());
+        const priceUsd = data.chart?.result?.[0]?.meta?.regularMarketPrice || null;
+        results[symbol] = { price: priceUsd ? Math.round(priceUsd * usdtwd) : null };
+      } else if (type === 'metal_two') {
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/C:' + symbol + '.TWO?interval=1d&range=1d';
+        const data = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText());
+        results[symbol] = { price: data.chart?.result?.[0]?.meta?.regularMarketPrice || null };
+      } else if (type === 'stock') {
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '.TW?interval=1d&range=1d';
+        const data = JSON.parse(UrlFetchApp.fetch(url, { muteHttpExceptions: true }).getContentText());
+        results[symbol] = { price: data.chart?.result?.[0]?.meta?.regularMarketPrice || null };
+      } else if (type === 'fx') {
+        results[symbol] = { price: 1 };
+      }
+    } catch(err) {
+      results[item.symbol] = { price: null, error: err.message };
+    }
+  });
+  return results;
+}
+
+// ===== 主處理函式 =====
+function doGet(e) {
+  try {
+    const p  = e.parameter;
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+
+    if (p.action === 'getPrices') {
+      const symbols = JSON.parse(decodeURIComponent(p.symbols || '[]'));
+      const prices  = getPrices(symbols);
+      return jsonRes(p, { success: true, prices });
+    }
+
+    if (p.action === 'addProduct') {
+      const sheet = ss.getSheetByName('商品');
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['商品名稱','種類','持有數量','現有價值','新增時間']);
+      }
+      sheet.appendRow(['#' + String(p.name), p.type, p.qty, p.value,
+        new Date().toLocaleString('zh-TW')]);
+    }
+
+    if (p.action === 'updateProduct') {
+      const sheet = ss.getSheetByName('商品');
+      const data  = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        const cellName = String(data[i][0]);
+        if (cellName === String(p.name) || cellName === '#' + String(p.name)) {
+          sheet.getRange(i + 1, 3).setValue(p.qty);
+          sheet.getRange(i + 1, 4).setValue(p.value);
+          break;
+        }
+      }
+    }
+
+    if (p.action === 'deleteProduct') {
+      const sheet = ss.getSheetByName('商品');
+      const data  = sheet.getDataRange().getValues();
+      for (let i = 1; i < data.length; i++) {
+        const cellName = String(data[i][0]);
+        if (cellName === String(p.name) || cellName === '#' + String(p.name)) {
+          sheet.deleteRow(i + 1);
+          break;
+        }
+      }
+      return jsonRes(p, { success: true, action: 'deleted', name: p.name });
+    }
+
+    if (p.action === 'addHistory') {
+      const sheet = ss.getSheetByName('歷史紀錄');
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['日期時間','商品','類型','數量','價格','換算價值']);
+      }
+      sheet.appendRow([p.datetime, p.name, p.tradeType,
+        p.qty, p.price, p.total]);
+    }
+
+    if (p.action === 'getHistory') {
+      const sheet = ss.getSheetByName('歷史紀錄');
+      const data  = sheet.getDataRange().getValues();
+      const rows  = data.slice(1);
+      return jsonRes(p, { success: true, rows });
+    }
+
+    if (p.action === 'getProducts') {
+      const sheet = ss.getSheetByName('商品');
+      const data  = sheet.getDataRange().getValues();
+      const rows  = data.slice(1).map(r => [String(r[0]).replace(/^#/, ''), r[1], r[2], r[3], r[4]]);
+      return jsonRes(p, { success: true, rows });
+    }
+
+    return jsonRes(p, { success: true });
+
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+    </div>
+  </div>
+
+  <div class="ap-field" style="margin-top:16px;">
+    <label class="ap-label">Apps Script 網址</label>
+    <input class="ap-input" id="gs-url-input" type="url" placeholder="https://script.google.com/macros/s/..."/>
+  </div>
+
+  <button class="ap-submit-btn" id="gs-bind-btn" style="margin-top:16px;">驗證並綁定</button>
+  <button class="ap-delete-btn" id="gs-unbind-btn" style="display:none;margin-top:12px;">解除綁定</button>
+</div>
+
+<!-- 聯絡我們 -->
+<div id="contact-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>聯絡我們</span>
+  </div>
+  <p class="brand-title">聯絡我們</p><h2 class="page-title">開發中</h2>
+</div>
+
+<!-- 新增商品 -->
+<div id="add-product-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>新增商品</span>
+  </div>
+
+  <div class="ap-form">
+
+    <div class="ap-field">
+      <label class="ap-label">商品種類</label>
+      <div class="ap-select-wrap">
+        <select class="ap-select" id="ap-type">
+          <option value="">請選擇種類</option>
+          <option value="加密貨幣">加密貨幣</option>
+          <option value="ETF/股票">ETF/股票</option>
+          <option value="貴金屬">貴金屬</option>
+          <option value="現金">現金</option>
+        </select>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="ap-select-arrow">
+          <path d="M6 9l6 6 6-6" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="ap-field">
+      <label class="ap-label">商品名稱</label>
+      <!-- 搜尋式下拉 -->
+      <div class="ap-search-select" id="ap-search-select">
+        <input class="ap-input" id="ap-name-search" type="text" placeholder="請先選擇商品種類" disabled autocomplete="off"/>
+        <div class="ap-dropdown" id="ap-dropdown" style="display:none;"></div>
+      </div>
+      <input class="ap-input" id="ap-name-custom" type="text" placeholder="輸入自定義名稱" style="display:none;margin-top:10px;"/>
+      <input type="hidden" id="ap-name-select"/>
+    </div>
+
+    <div class="ap-field">
+      <div class="ap-label-wrap">
+        <label class="ap-label">原持有量</label>
+        <button class="ap-help-btn" onclick="document.getElementById('help-qty-popup').classList.add('show')">?</button>
+      </div>
+      <input class="ap-input" id="ap-qty" type="number" placeholder="例：0.5、100、3.2"/>
+    </div>
+
+    <div class="ap-field">
+      <div class="ap-label-wrap">
+        <label class="ap-label">購入成本 (NT$)</label>
+        <button class="ap-help-btn" onclick="document.getElementById('help-value-popup').classList.add('show')">?</button>
+      </div>
+      <input class="ap-input" id="ap-value" type="number" placeholder="例：125000"/>
+    </div>
+
+  </div>
+
+  <button class="ap-submit-btn" id="ap-submit-btn">新增商品</button>
+  <button class="ap-delete-btn" id="ap-delete-btn">刪除商品</button>
+  <p class="dev-hint">* 新增後將顯示於交易頁面商品列表</p>
+</div>
+
+<!-- 刪除商品頁面 -->
+<div id="delete-product-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span>刪除商品</span>
+  </div>
+  <div class="trade-list" id="delete-list"></div>
+</div>
+
+<!-- 交易詳情頁面 -->
+<div id="trade-detail-page" class="page">
+  <div class="page-topbar">
+    <button class="topbar-back-btn" onclick="document.getElementById('back-button').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span id="td-topbar-title">買入 / 賣出</span>
+  </div>
+  <div class="td-header">
+    <div class="td-icon" id="td-icon">₿</div>
+    <div class="td-name" id="td-name">BTC</div>
+    <div class="td-tag" id="td-tag">加密貨幣</div>
+    <div class="td-holding">
+      <span>持有：<strong id="td-qty">--</strong></span>
+      <span>均價：<strong id="td-avg">--</strong></span>
+    </div>
+    <div class="td-holding" style="margin-top:4px;">
+      <span>現有價值：<strong id="td-current-value">--</strong></span>
+    </div>
+  </div>
+
+  <!-- 買入 / 賣出 切換 -->
+  <div class="td-tab-wrap">
+    <button class="td-tab active" id="td-tab-buy" data-type="buy">買入</button>
+    <button class="td-tab" id="td-tab-sell" data-type="sell">賣出</button>
+  </div>
+
+  <div class="td-form">
+    <div class="ap-field" id="td-price-field">
+      <div class="ap-label-wrap">
+        <label class="ap-label">總價（NT$）</label>
+      </div>
+      <input class="ap-input" id="td-price" type="number" placeholder="輸入總價"/>
+    </div>
+    <div class="ap-field">
+      <div class="ap-label-wrap">
+        <label class="ap-label">數量</label>
+        <button class="ap-help-btn" onclick="document.getElementById('help-td-qty-popup').classList.add('show')">?</button>
+      </div>
+      <input class="ap-input" id="td-qty-input" type="number" placeholder="輸入交易數量"/>
+    </div>
+
+    <!-- 換算價值 -->
+    <div class="td-result">
+      <span class="td-result-label">換算價值</span>
+      <span class="td-result-value" id="td-result-value">NT$ 0</span>
+    </div>
+    <!-- 換算均價 -->
+    <div class="td-result" id="td-avg-result">
+      <span class="td-result-label">換算均價</span>
+      <span class="td-result-value" id="td-result-avg">--</span>
+    </div>
+  </div>
+
+  <button class="ap-submit-btn" id="td-confirm-btn">確認買入</button>
+</div>
+
+<!-- 刪除確認浮窗 -->
+<div id="delete-confirm-modal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:24px;">
+  <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:320px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-size:18px; font-weight:800; color:#1E2A38; margin-bottom:12px;">確定刪除？</div>
+    <div style="font-size:14px; color:#666; line-height:1.6; margin-bottom:24px;">
+      刪除「<span id="delete-confirm-name" style="font-weight:700;color:#e8706f;"></span>」後，該資產的持有數量與成本將全數清零，此操作無法復原。
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button id="delete-confirm-cancel" style="flex:1; padding:13px; border-radius:12px; border:none; background:#f0f0f0; color:#555; font-size:15px; font-weight:700; cursor:pointer;">取消</button>
+      <button id="delete-confirm-ok" style="flex:1; padding:13px; border-radius:12px; border:none; background:#e8706f; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">確定刪除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 說明浮窗：原持有量 -->
+<div id="help-qty-popup" class="ap-help-popup">
+  <div class="ap-help-box">
+    <strong>原持有量</strong>
+    填入你目前已持有的數量。<br>
+    單位依商品種類而定：<br>
+    ・加密貨幣：幣數（如 0.5 BTC）<br>
+    ・ETF/股票：股數（如 100 股）<br>
+    ・黃金：公克（如 3.75 克）<br>
+    ・現金：台幣金額（如 50000）<br>
+    若是全新商品，可填 0。
+    <button class="ap-help-close" onclick="document.getElementById('help-qty-popup').classList.remove('show')">了解</button>
+  </div>
+</div>
+
+<!-- 說明浮窗：購入成本 -->
+<div id="help-value-popup" class="ap-help-popup">
+  <div class="ap-help-box">
+    <strong>購入成本 (NT$)</strong>
+    填入你購買此資產所花費的<b>總金額</b>（台幣）。<br><br>
+    例如：<br>
+    ・買了 0.5 BTC，花了 NT$ 800,000，就填 800000<br>
+    ・買了 100 股 ETF，花了 NT$ 20,000，就填 20000<br><br>
+    系統會用此金額計算持有均價與損益。
+    <button class="ap-help-close" onclick="document.getElementById('help-value-popup').classList.remove('show')">了解</button>
+  </div>
+</div>
+
+<!-- 說明浮窗：交易價格 -->
+<div id="help-td-price-popup" class="ap-help-popup">
+  <div class="ap-help-box">
+    <strong>價格（NT$）</strong>
+    填入此次交易的<b>單價</b>（每單位的台幣價格）。<br><br>
+    例如：<br>
+    ・BTC 現在 NT$ 1,600,000 一顆，就填 1600000<br>
+    ・股票每股 NT$ 200，就填 200<br><br>
+    系統會自動換算總交易金額。
+    <button class="ap-help-close" onclick="document.getElementById('help-td-price-popup').classList.remove('show')">了解</button>
+  </div>
+</div>
+
+<!-- 說明浮窗：交易數量 -->
+<div id="help-td-qty-popup" class="ap-help-popup">
+  <div class="ap-help-box">
+    <strong>數量</strong>
+    填入此次交易的<b>數量</b>。<br>
+    單位與商品種類相同：<br>
+    ・加密貨幣：幣數（如 0.1）<br>
+    ・ETF/股票：股數（如 50）<br>
+    ・黃金：公克（如 1.25）<br>
+    ・現金：台幣金額（如 10000）
+    <button class="ap-help-close" onclick="document.getElementById('help-td-qty-popup').classList.remove('show')">了解</button>
+  </div>
+</div>
+
+<!-- 解除綁定確認浮窗 -->
+<div id="unbind-confirm-modal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:24px;">
+  <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:320px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div id="unbind-confirm-title" style="font-size:18px; font-weight:800; color:#1E2A38; margin-bottom:12px;">確定解除綁定？</div>
+    <div style="font-size:14px; color:#666; line-height:1.6; margin-bottom:24px;">
+      解除後將無法讀取或寫入 Google Sheet，重新開啟 App 後本機資料將無法還原。
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button id="unbind-confirm-cancel" style="flex:1; padding:13px; border-radius:12px; border:none; background:#f0f0f0; color:#555; font-size:15px; font-weight:700; cursor:pointer;">取消</button>
+      <button id="unbind-confirm-ok" style="flex:1; padding:13px; border-radius:12px; border:none; background:#e8706f; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">確定解除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 驗證並綁定確認浮窗 -->
+<div id="bind-confirm-modal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:24px;">
+  <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:320px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div id="bind-confirm-title" style="font-size:18px; font-weight:800; color:#1E2A38; margin-bottom:12px;">確認綁定 Google Sheet？</div>
+    <div style="font-size:14px; color:#666; line-height:1.6; margin-bottom:24px;">
+      綁定後將自動同步以下操作到你的 Google Sheet：<br>
+      <span style="display:block; margin-top:8px;">・新增商品</span>
+      <span style="display:block;">・買入 / 賣出交易紀錄</span>
+      <span style="display:block; margin-bottom:8px;">・刪除商品</span>
+      請確認已正確部署 Apps Script 並複製了正確的網址。
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button id="bind-confirm-cancel" style="flex:1; padding:13px; border-radius:12px; border:none; background:#f0f0f0; color:#555; font-size:15px; font-weight:700; cursor:pointer;">取消</button>
+      <button id="bind-confirm-ok" style="flex:1; padding:13px; border-radius:12px; border:none; background:#4caf7d; color:#fff; font-size:15px; font-weight:700; cursor:pointer;">確定綁定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 主題 Popup -->
+<div class="popup" id="theme-popup">
+  <div class="popup-content">
+    <div class="popup-item" data-value="system">系統&amp;自動</div>
+    <div class="popup-item" data-value="light">淺色模式</div>
+    <div class="popup-item" data-value="dark">深色模式</div>
+    <div class="popup-cancel">取消</div>
+  </div>
+</div>
+
+<!-- ── 工作台入口 Modal ── -->
+<div id="workspace-modal" class="cal-modal-overlay" style="display:none">
+  <div class="cal-modal-box ws-modal-box">
+    <div class="cal-modal-topbar">
+      <button class="cal-modal-close" id="wsModalClose">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="cal-modal-title">工作台</div>
+      <div style="width:32px"></div>
+    </div>
+    <!-- iOS 風格 App Grid -->
+    <div class="ws-app-grid">
+      <button class="ws-app-icon" id="wsOpenClothesBtn">
+        <div class="ws-icon-wrap ws-icon-clothes">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+          </svg>
+        </div>
+        <span class="ws-app-label">服飾管理</span>
+      </button>
+      <button class="ws-app-icon" id="wsOpenCalBtn">
+        <div class="ws-icon-wrap ws-icon-cal">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="3"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <text x="12" y="19" text-anchor="middle" font-size="7" fill="#fff" stroke="none" font-weight="700" font-family="Arial"></text>
+          </svg>
+        </div>
+        <span class="ws-app-label">行事曆</span>
+      </button>
+      <button class="ws-app-icon" id="wsOpenNotesBtn">
+        <div class="ws-icon-wrap ws-icon-notes">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <line x1="10" y1="9" x2="8" y2="9"/>
+          </svg>
+        </div>
+        <span class="ws-app-label">記事本</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 記事本 Modal ── -->
+<div id="notes-modal" class="cal-modal-overlay" style="display:none">
+  <div class="cal-modal-box">
+    <div class="cal-modal-topbar">
+      <button class="cal-modal-close" id="notesModalClose">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="cal-modal-title">記事本</div>
+      <button class="cal-nav-btn" id="notesAddBtn" style="width:32px;height:32px;font-size:20px;">＋</button>
+    </div>
+    <div class="notes-sync-status" id="notesSyncStatus"></div>
+    <div class="acs-notes-list" id="acsNotesList"></div>
+  </div>
+</div>
+
+<!-- ── 記事本 新增/編輯 Modal ── -->
+<div id="note-edit-modal" class="cal-day-overlay" style="display:none">
+  <div class="cal-day-box note-edit-box">
+    <div class="cal-day-header">
+      <span class="cal-day-date" id="noteEditTitle">新增筆記</span>
+      <button class="cal-day-edit-btn" id="noteEditDeleteBtn" style="display:none;color:#ff6b6b;border-color:#ff6b6b;">刪除</button>
+    </div>
+    <input type="text" class="note-edit-input" id="noteEditTitleInput" placeholder="標題" />
+    <input type="text" class="note-edit-input" id="noteEditTagsInput" placeholder="標籤（逗號分隔）" style="font-size:13px;" />
+    <textarea class="cal-edit-textarea" id="noteEditContent" placeholder="內容..."></textarea>
+    <div class="cal-day-actions">
+      <button class="cal-day-close-btn" id="noteEditCancel">取消</button>
+      <button class="cal-day-save-btn" id="noteEditSave">儲存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 記事本 查看 Modal ── -->
+<div id="note-view-modal" class="cal-day-overlay" style="display:none">
+  <div class="cal-day-box">
+    <div class="cal-day-header">
+      <span class="cal-day-date" id="noteViewTitle" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <button class="cal-day-edit-btn" id="noteViewEditBtn">✏️</button>
+    </div>
+    <div id="noteViewTags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+    <div id="noteViewContent" style="font-size:14px;white-space:pre-wrap;line-height:1.7;max-height:260px;overflow-y:auto;"></div>
+    <div class="cal-day-actions">
+      <button class="cal-day-close-btn" id="noteViewClose">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 行事曆 Modal ── -->
+<div id="calendar-modal" class="cal-modal-overlay" style="display:none">
+  <div class="cal-modal-box">
+    <div class="cal-modal-topbar">
+      <button class="cal-modal-close" id="calModalClose">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="cal-modal-title">行事曆</div>
+      <div style="width:32px"></div>
+    </div>
+    <!-- 月份導航 -->
+    <div class="cal-nav-row">
+      <button class="cal-nav-btn" id="calPrevBtn">‹</button>
+      <span class="cal-nav-label" id="calMonthLabel">2026 / 3月</span>
+      <button class="cal-nav-btn" id="calNextBtn">›</button>
+      <button class="cal-today-btn" id="calTodayBtn">今天</button>
+    </div>
+    <!-- 同步狀態 -->
+    <div class="cal-sync-status" id="calSyncStatus"></div>
+    <!-- 星期標題 -->
+    <div class="cal-weekdays">
+      <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+    </div>
+    <!-- 日期格子 -->
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+</div>
+
+<!-- 行事曆 編輯/查看 Modal -->
+<div id="cal-day-modal" class="cal-day-overlay" style="display:none">
+  <div class="cal-day-box">
+    <div class="cal-day-header">
+      <span class="cal-day-date" id="calDayDate"></span>
+      <button class="cal-day-edit-btn" id="calDayEditBtn">✏️ 編輯</button>
+    </div>
+    <div class="cal-day-tasks" id="calDayTasks"></div>
+    <div class="cal-day-actions">
+      <button class="cal-day-close-btn" id="calDayClose">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- 行事曆 輸入 Modal -->
+<div id="cal-edit-modal" class="cal-day-overlay" style="display:none">
+  <div class="cal-day-box">
+    <div class="cal-day-header">
+      <span class="cal-day-date" id="calEditDate"></span>
+    </div>
+    <textarea class="cal-edit-textarea" id="calEditInput" placeholder="每行一個行程"></textarea>
+    <div class="cal-day-actions">
+      <button class="cal-day-close-btn" id="calEditCancel">取消</button>
+      <button class="cal-day-save-btn" id="calEditSave">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item active" data-target="app">
+    <svg viewBox="0 0 24 24"><path d="M12 3 3 10v11h6v-6h6v6h6V10l-9-7z"></path></svg><span>總覽</span>
+  </div>
+  <div class="nav-item" data-target="rebalance">
+    <svg viewBox="0 0 24 24"><path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5a5 5 0 0 1-9.5 2H5.3A7 7 0 0 0 19 13c0-3.87-3.13-7-7-7z"></path><path d="M12 18v3l4-4-4-4v3c-2.76 0-5-2.24-5-5a5 5 0 0 1 9.5-2h2.2A7 7 0 0 0 5 11c0 3.87 3.13 7 7 7z"></path></svg><span>再平衡</span>
+  </div>
+  <div class="nav-item" data-target="export">
+    <svg viewBox="0 0 24 24"><path d="M4 19h16v2H4v-2zM7 14l3-3 3 3 6-6 1.4 1.4-7.4 7.4-3-3-3 3L3.6 12.8 5 11.4 7 13.4z"></path></svg><span>交易</span>
+  </div>
+  <div class="nav-item" data-target="history">
+    <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 1 0 8.94 10h-2.02A7 7 0 1 1 13 5V3z"></path><path d="M12 8h2v6l5 3-1 1.73-6-3.73V8z"></path></svg><span>歷史紀錄</span>
+  </div>
+  <div class="nav-item" data-target="settings">
+    <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 12.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L1.7 7.88a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L1.82 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.22.09.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.56zM11 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"></path></svg><span>設定</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     服飾管理系統 全螢幕 Overlay
+════════════════════════════════════════════ -->
+<div id="clothes-overlay" style="display:none">
+
+  <!-- Topbar -->
+  <div class="cl-topbar">
+    <button class="cl-back-btn" id="cl-back-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18L9 12L15 6"/>
+      </svg>
+    </button>
+    <span class="cl-topbar-title">服飾管理</span>
+    <!-- 動態右側按鈕（由 JS 控制顯示） -->
+    <div class="cl-topbar-right">
+      <span id="cl-sync-status" class="cl-sync-status"></span>
+      <button class="cl-topbar-btn" id="cl-staging-commit-all-btn" style="display:none">全部入庫</button>
+      <button class="cl-topbar-btn cl-topbar-btn-icon" id="cl-staging-clear-btn" style="display:none" title="清空">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button>
+      <button class="cl-topbar-btn" id="cl-staging-add-btn" style="display:none">＋</button>
+      <button class="cl-topbar-btn" id="cl-outbound-add-btn" style="display:none">＋</button>
+      <button class="cl-topbar-btn" id="cl-deposit-btn" style="display:none">入金</button>
+      <button class="cl-topbar-btn" id="cl-expense-btn" style="display:none">支出</button>
+    </div>
+  </div>
+
+  <!-- ① 貨運核對單 -->
+  <div class="cl-page" data-page="staging" style="display:flex">
+    <div class="cl-filter-bar">
+      <button class="cl-filter-btn active" data-filter="all">全部</button>
+      <button class="cl-filter-btn" data-filter="待入庫">待入庫</button>
+      <button class="cl-filter-btn" data-filter="已入庫">已入庫</button>
+    </div>
+    <div id="cl-staging-list" class="cl-list-wrap"></div>
+  </div>
+
+  <!-- ② 進貨明細 -->
+  <div class="cl-page" data-page="inbound" id="tab-inbound" style="display:none">
+    <div class="cl-filter-bar">
+      <button class="cl-filter-btn active" data-days="0">全部</button>
+      <button class="cl-filter-btn" data-days="7">7天</button>
+      <button class="cl-filter-btn" data-days="30">30天</button>
+      <button class="cl-filter-btn" data-days="90">90天</button>
+      <button class="cl-filter-btn" data-days="custom">自訂</button>
+    </div>
+    <div class="cl-custom-date-range" id="cl-inbound-custom-range" style="display:none">
+      <input type="date" id="cl-inbound-date-from" class="cl-input cl-input-sm"/>
+      <span style="color:var(--color-text-secondary);font-size:12px">～</span>
+      <input type="date" id="cl-inbound-date-to" class="cl-input cl-input-sm"/>
+    </div>
+    <div id="cl-inbound-list" class="cl-list-wrap"></div>
+  </div>
+
+  <!-- ③ 庫存管理 -->
+  <div class="cl-page" data-page="stock" style="display:none">
+    <div class="cl-search-bar">
+      <input id="cl-stock-search" type="text" placeholder="搜尋款式或代碼…" class="cl-search-input"/>
+    </div>
+    <div class="cl-filter-bar">
+      <button class="cl-filter-btn active" data-stock-filter="all">全部</button>
+      <button class="cl-filter-btn" data-stock-filter="available">可售</button>
+      <button class="cl-filter-btn" data-stock-filter="sold">售完</button>
+      <button class="cl-filter-btn" data-stock-filter="reorder">追加</button>
+    </div>
+    <div class="cl-stock-stat-bar"><span id="cl-stock-stat"></span></div>
+    <div id="cl-stock-list" class="cl-list-wrap"></div>
+  </div>
+
+  <!-- ④ 出貨明細 -->
+  <div class="cl-page" data-page="outbound" id="tab-outbound" style="display:none">
+    <div class="cl-filter-bar">
+      <button class="cl-filter-btn active" data-ob-status="all">全部</button>
+      <button class="cl-filter-btn" data-ob-status="待出貨">待出貨</button>
+      <button class="cl-filter-btn" data-ob-status="已出貨">已出貨</button>
+    </div>
+    <div class="cl-filter-bar" style="padding-top:2px">
+      <button class="cl-filter-btn active" data-days="0">全部</button>
+      <button class="cl-filter-btn" data-days="7">7天</button>
+      <button class="cl-filter-btn" data-days="30">30天</button>
+      <button class="cl-filter-btn" data-days="90">90天</button>
+      <button class="cl-filter-btn" data-days="custom">自訂</button>
+    </div>
+    <div class="cl-custom-date-range" id="cl-outbound-custom-range" style="display:none">
+      <input type="date" id="cl-outbound-date-from" class="cl-input cl-input-sm"/>
+      <span style="color:var(--color-text-secondary);font-size:12px">～</span>
+      <input type="date" id="cl-outbound-date-to" class="cl-input cl-input-sm"/>
+    </div>
+    <div id="cl-outbound-list" class="cl-list-wrap"></div>
+  </div>
+
+  <!-- ⑤ 預存盈餘 -->
+  <div class="cl-page" data-page="surplus" id="tab-surplus" style="display:none">
+    <div class="cl-surplus-summary">
+      <div class="cl-surplus-summary-row">
+        <div class="cl-surplus-item">
+          <span class="cl-surplus-label">累計入金</span>
+          <span id="cl-surplus-deposit-total" class="cl-surplus-val cl-val-green">₩0</span>
+        </div>
+        <div class="cl-surplus-item">
+          <span class="cl-surplus-label">累計支出</span>
+          <span id="cl-surplus-expense-total" class="cl-surplus-val cl-val-red">₩0</span>
+        </div>
+      </div>
+      <div class="cl-surplus-balance-wrap">
+        <span class="cl-surplus-label">結餘</span>
+        <span id="cl-surplus-balance" class="cl-surplus-balance">₩0</span>
+      </div>
+    </div>
+    <div class="cl-filter-bar">
+      <button class="cl-filter-btn active" data-days="0">全部</button>
+      <button class="cl-filter-btn" data-days="7">7天</button>
+      <button class="cl-filter-btn" data-days="30">30天</button>
+      <button class="cl-filter-btn" data-days="90">90天</button>
+      <button class="cl-filter-btn" data-days="custom">自訂</button>
+    </div>
+    <div class="cl-custom-date-range" id="cl-surplus-custom-range" style="display:none">
+      <input type="date" id="cl-surplus-date-from" class="cl-input cl-input-sm"/>
+      <span style="color:var(--color-text-secondary);font-size:12px">～</span>
+      <input type="date" id="cl-surplus-date-to" class="cl-input cl-input-sm"/>
+    </div>
+    <div class="cl-surplus-section">
+      <div class="cl-section-label">入金紀錄</div>
+      <div id="cl-deposit-list"></div>
+    </div>
+    <div class="cl-surplus-section">
+      <div class="cl-section-label">支出紀錄</div>
+      <div id="cl-expense-list"></div>
+    </div>
+  </div>
+
+  <!-- 底部導覽 -->
+  <div class="cl-bottom-nav">
+    <div class="cl-nav-item active" data-tab="staging">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <path d="M9 12h6M9 16h4"/>
+      </svg>
+      <span>核對單</span>
+    </div>
+    <div class="cl-nav-item" data-tab="inbound">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v13M8 12l4 4 4-4"/>
+        <path d="M20 21H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1z"/>
+      </svg>
+      <span>進貨</span>
+    </div>
+    <div class="cl-nav-item" data-tab="stock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      <span>庫存</span>
+    </div>
+    <div class="cl-nav-item" data-tab="outbound">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="3" width="15" height="13" rx="1"/>
+        <path d="M16 8h4l3 5v4h-7V8z"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      <span>出貨</span>
+    </div>
+    <div class="cl-nav-item" data-tab="surplus">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>盈餘</span>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="cl-toast" class="cl-toast"></div>
+
+  <!-- ── Modal：新增/編輯 核對單 ── -->
+  <div id="cl-staging-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">貨運核對單</span>
+        <button class="cl-modal-close" id="cl-staging-modal-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-form-row">
+          <label>訂購日期</label>
+          <input id="cl-s-date" type="date" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>商品代碼</label>
+          <input id="cl-s-code" type="text" placeholder="S260101" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>檔口編號</label>
+          <input id="cl-s-stall" type="text" placeholder="L208" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>款式名稱</label>
+          <input id="cl-s-style" type="text" placeholder="例：抽繩蛋糕短裙" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>尺寸</label>
+          <div class="cl-size-input-wrap">
+            <select id="cl-s-size-select" class="cl-input cl-select cl-input-sm" onchange="clHandleSizeSelect(this)">
+              <option value="F">F</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="custom">自行輸入</option>
+            </select>
+            <input id="cl-s-size" type="text" placeholder="輸入尺寸" class="cl-input cl-input-sm" style="display:none"/>
+          </div>
+        </div>
+        <div class="cl-form-row">
+          <label>訂購方式</label>
+          <select id="cl-s-source" class="cl-input cl-input-sm cl-select">
+            <option value="振興">振興（3%）</option>
+            <option value="網站">網站（4%）</option>
+          </select>
+        </div>
+        <div class="cl-form-row">
+          <label>韓幣成本（單件）</label>
+          <input id="cl-s-krw" type="number" placeholder="42000" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>進貨匯率</label>
+          <input id="cl-s-rate" type="number" placeholder="43.7" step="0.1" class="cl-input cl-input-sm"/>
+        </div>
+        <div class="cl-form-row">
+          <label>數量</label>
+          <input id="cl-s-qty" type="number" placeholder="2" class="cl-input cl-input-sm"/>
+        </div>
+        <div id="cl-s-preview" class="cl-preview-bar"></div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-primary" id="cl-staging-save">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：庫存編輯 ── -->
+  <div id="cl-stock-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">編輯商品</span>
+        <button class="cl-modal-close" id="cl-stock-modal-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-stock-info-block">
+          <div class="cl-stock-info-code" id="cl-st-code"></div>
+          <div class="cl-stock-info-style" id="cl-st-style"></div>
+          <div class="cl-stock-info-cost">成本 <span id="cl-st-cost"></span></div>
+        </div>
+        <div class="cl-form-row">
+          <label>售價（NT$）</label>
+          <input id="cl-st-price" type="number" placeholder="1280" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>狀態</label>
+          <select id="cl-st-status" class="cl-input cl-input-sm cl-select">
+            <option value="可售">可售</option>
+            <option value="售完">售完</option>
+            <option value="下架">下架</option>
+          </select>
+        </div>
+        <div class="cl-form-row cl-form-row-check">
+          <label>標記為樣品</label>
+          <input id="cl-st-sample" type="checkbox" class="cl-checkbox"/>
+        </div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-primary" id="cl-stock-save">更新</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：新增出貨 ── -->
+  <div id="cl-outbound-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal cl-modal-tall">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">新增出貨</span>
+        <button class="cl-modal-close" id="cl-outbound-modal-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-divider">收件資料</div>
+        <div class="cl-form-row">
+          <label>IG 帳號</label>
+          <input id="cl-ob-ig" type="text" placeholder="@username" class="cl-input"/>
+        </div>
+        <div class="cl-form-row-group">
+          <div class="cl-form-row">
+            <label>姓名</label>
+            <input id="cl-ob-name" type="text" placeholder="王小明" class="cl-input"/>
+          </div>
+          <div class="cl-form-row">
+            <label>電話</label>
+            <input id="cl-ob-phone" type="tel" placeholder="09xx-xxx-xxx" class="cl-input"/>
+          </div>
+        </div>
+        <div class="cl-form-row">
+          <label id="cl-ob-address-label">地址</label>
+          <!-- 門市標籤（選擇門市後顯示） -->
+          <div id="cl-ob-store-tag" style="display:none;padding:10px 12px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+            <span id="cl-ob-store-tag-text" style="color:#a78bfa;font-size:14px;flex:1"></span>
+            <button type="button" id="cl-ob-store-tag-close" style="background:none;border:none;color:#a78bfa;cursor:pointer;font-size:18px;padding:0 0 0 12px;line-height:1">×</button>
+          </div>
+          <input id="cl-ob-address" type="text" placeholder="完整地址" class="cl-input"/>
+          <!-- 門市搜尋下拉選單 -->
+          <div id="cl-ob-store-panel" class="cl-dropdown-panel" style="display:none;max-height:240px;overflow-y:auto;margin-top:8px"></div>
+          <!-- 隱藏欄位：存儲門市代號和名稱 -->
+          <input type="hidden" id="cl-ob-store-code"/>
+          <input type="hidden" id="cl-ob-store-name"/>
+        </div>
+        <div class="cl-form-row-group">
+          <div class="cl-form-row">
+            <label>寄送方式</label>
+            <select id="cl-ob-shipping" class="cl-input cl-select">
+              <option value="7-ELEVEN">7-ELEVEN</option>
+              <option value="全家">全家</option>
+              <option value="宅配">宅配</option>
+              <option value="面交">面交</option>
+            </select>
+          </div>
+          <div class="cl-form-row">
+            <label>銀行後五碼</label>
+            <input id="cl-ob-bank" type="text" placeholder="12345" maxlength="5" class="cl-input"/>
+          </div>
+        </div>
+        <div class="cl-form-row-group">
+          <div class="cl-form-row">
+            <label>建立日期</label>
+            <input id="cl-ob-date" type="date" class="cl-input"/>
+          </div>
+          <div class="cl-form-row">
+            <label>狀態</label>
+            <select id="cl-ob-status" class="cl-input cl-select">
+              <option value="待出貨">待出貨</option>
+              <option value="已出貨">已出貨</option>
+            </select>
+          </div>
+        </div>
+        <div class="cl-form-row">
+          <label>運費（NT$）</label>
+          <div class="cl-size-input-wrap">
+            <select id="cl-ob-fee-select" class="cl-input cl-select cl-input-sm" onchange="clHandleShippingFee(this)">
+              <option value="100">100</option>
+              <option value="60">60</option>
+              <option value="0">免運</option>
+              <option value="custom">自行輸入</option>
+            </select>
+            <input id="cl-ob-fee" type="number" placeholder="輸入金額" class="cl-input cl-input-sm" style="display:none"/>
+          </div>
+        </div>
+        <div class="cl-divider">加入商品</div>
+        <div class="cl-form-row">
+          <label>選擇商品</label>
+          <div class="cl-custom-dropdown" id="cl-ob-dropdown">
+            <input id="cl-ob-search" type="text" placeholder="搜尋或選擇商品…" class="cl-input" autocomplete="off"/>
+            <div class="cl-dropdown-panel" id="cl-ob-panel" style="display:none">
+              <div class="cl-dropdown-list" id="cl-ob-list"></div>
+            </div>
+          </div>
+          <input type="hidden" id="cl-ob-product"/>
+        </div>
+        <div class="cl-form-row-group cl-form-row-group-2">
+          <div class="cl-form-row">
+            <label>數量</label>
+            <input id="cl-ob-qty" type="number" value="1" min="1" class="cl-input"/>
+          </div>
+          <div class="cl-form-row">
+            <label>售價（NT$）</label>
+            <input id="cl-ob-price" type="number" placeholder="1280" class="cl-input"/>
+          </div>
+        </div>
+        <button class="cl-btn cl-btn-outline" id="cl-ob-add-item">＋ 加入清單</button>
+        <div class="cl-divider">出貨清單</div>
+        <div id="cl-ob-cart-items"></div>
+
+        <div class="cl-cart-total-row">
+          <span>合計（含運）</span>
+          <span id="cl-ob-cart-total">NT$ 0</span>
+        </div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-primary" id="cl-ob-submit">新增訂單</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：清空核對單 ── -->
+  <div id="cl-clear-staging-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">清空核對單</span>
+        <button class="cl-modal-close" id="cl-clear-staging-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-form-row" style="margin-bottom:4px">
+          <label style="font-size:13px;opacity:0.6">選擇要刪除的狀態</label>
+        </div>
+        <div class="cl-form-row" style="gap:12px;flex-direction:column">
+          <label class="cl-checkbox-row">
+            <input type="checkbox" id="cl-clear-pending" checked/>
+            <span>待入庫</span>
+          </label>
+          <label class="cl-checkbox-row">
+            <input type="checkbox" id="cl-clear-done" checked/>
+            <span>已入庫</span>
+          </label>
+        </div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-danger" id="cl-clear-staging-confirm">確認清空</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：新增入金 ── -->
+  <div id="cl-deposit-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">新增入金</span>
+        <button class="cl-modal-close" id="cl-deposit-modal-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-form-row">
+          <label>日期</label>
+          <input id="cl-dep-date" type="date" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>金額（NT$）</label>
+          <input id="cl-dep-ntd" type="number" placeholder="10000" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>匯率</label>
+          <input id="cl-dep-rate" type="number" placeholder="43.7" step="0.1" class="cl-input cl-input-sm"/>
+        </div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-primary" id="cl-deposit-save">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：新增支出 ── -->
+  <div id="cl-expense-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal">
+      <div class="cl-modal-header">
+        <span class="cl-modal-title">新增支出</span>
+        <button class="cl-modal-close" id="cl-expense-modal-close">✕</button>
+      </div>
+      <div class="cl-modal-body">
+        <div class="cl-form-row">
+          <label>日期</label>
+          <input id="cl-exp-date" type="date" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>商品費（₩）</label>
+          <input id="cl-exp-product" type="number" placeholder="0" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>代購費（₩）</label>
+          <input id="cl-exp-agency" type="number" placeholder="0" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>運費（₩）</label>
+          <input id="cl-exp-shipping" type="number" placeholder="0" class="cl-input"/>
+        </div>
+        <div class="cl-form-row">
+          <label>備註</label>
+          <input id="cl-exp-note" type="text" placeholder="第一批進貨" class="cl-input"/>
+        </div>
+      </div>
+      <div class="cl-modal-footer">
+        <button class="cl-btn cl-btn-primary" id="cl-expense-save">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal：確認框 ── -->
+  <div id="cl-confirm-modal" class="cl-modal-overlay" style="display:none">
+    <div class="cl-modal cl-modal-sm">
+      <div class="cl-modal-body cl-confirm-body">
+        <p id="cl-confirm-msg"></p>
+      </div>
+      <div class="cl-modal-footer cl-confirm-footer">
+        <button class="cl-btn cl-btn-ghost" id="cl-confirm-cancel">取消</button>
+        <button class="cl-btn cl-btn-primary" id="cl-confirm-ok">確定</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!-- ══ 服飾管理系統結束 ══ -->
+
+<script src="app.js"></script>
+<script src="clothes.js"></script>
+</body>
+</html>
+
