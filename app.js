@@ -1,3 +1,7 @@
+console.log('=== PWA 版本檢查 ===');
+console.log('Firebase API 已設定');
+console.log('版本：2026-04-05 v2');
+
 // ===== 頁面定義 =====
 const pages = {
   app: document.getElementById('app'),
