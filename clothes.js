@@ -1368,8 +1368,8 @@
     const address  = modal.querySelector('#cl-ob-address').value.trim();
     const shipping = modal.querySelector('#cl-ob-shipping').value;
     const bank     = modal.querySelector('#cl-ob-bank').value.trim();
-    const storeCode = modal.querySelector('#cl-ob-store-code')?.value || '';
-    const storeName = modal.querySelector('#cl-ob-store-name')?.value || '';
+    const storeCode = document.getElementById('cl-ob-store-code')?.value || '';
+    const storeName = document.getElementById('cl-ob-store-name')?.value || '';
     
     console.log('[提交出貨] storeCode:', storeCode);
     console.log('[提交出貨] storeName:', storeName);
