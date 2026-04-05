@@ -1011,6 +1011,8 @@
   
   // 選擇門市
   window.clSelectStore = function(code, name, address) {
+    console.log('[門市選擇] code:', code, 'name:', name, 'address:', address);
+    
     const addressInput = document.getElementById('cl-ob-address');
     const storePanel = document.getElementById('cl-ob-store-panel');
     const storeCodeInput = document.getElementById('cl-ob-store-code');
@@ -1018,10 +1020,19 @@
     const storeTag = document.getElementById('cl-ob-store-tag');
     const storeTagText = document.getElementById('cl-ob-store-tag-text');
     
+    console.log('[門市選擇] storeCodeInput:', storeCodeInput);
+    console.log('[門市選擇] storeNameInput:', storeNameInput);
+    
     // 存儲資料
     if (addressInput) addressInput.value = address;
-    if (storeCodeInput) storeCodeInput.value = code;
-    if (storeNameInput) storeNameInput.value = name;
+    if (storeCodeInput) {
+      storeCodeInput.value = code;
+      console.log('[門市選擇] 已設定 storeCode:', storeCodeInput.value);
+    }
+    if (storeNameInput) {
+      storeNameInput.value = name;
+      console.log('[門市選擇] 已設定 storeName:', storeNameInput.value);
+    }
     
     // 顯示標籤，隱藏輸入框和下拉選單
     if (storeTagText) storeTagText.textContent = name;
@@ -1357,8 +1368,12 @@
     const address  = modal.querySelector('#cl-ob-address').value.trim();
     const shipping = modal.querySelector('#cl-ob-shipping').value;
     const bank     = modal.querySelector('#cl-ob-bank').value.trim();
-    const storeCode = document.getElementById('cl-ob-store-code')?.value || '';
-    const storeName = document.getElementById('cl-ob-store-name')?.value || '';
+    const storeCode = modal.querySelector('#cl-ob-store-code')?.value || '';
+    const storeName = modal.querySelector('#cl-ob-store-name')?.value || '';
+    
+    console.log('[提交出貨] storeCode:', storeCode);
+    console.log('[提交出貨] storeName:', storeName);
+    
     const feeSelect = modal.querySelector('#cl-ob-fee-select');
     const feeInput  = modal.querySelector('#cl-ob-fee');
     const fee       = feeSelect?.value === 'custom' ? (parseFloat(feeInput?.value) || 0) : (parseFloat(feeSelect?.value) || 0);
@@ -1382,6 +1397,8 @@
       cost: item.cost, price: item.price,
       qty: item.qty, subtotal: item.subtotal  // subtotal 不含運費，運費另存 fee
     }));
+    
+    console.log('[提交出貨] 即將送出的資料:', JSON.stringify(rows, null, 2));
 
     isSubmitting = true;
     const obBtn = document.getElementById('cl-ob-submit');
