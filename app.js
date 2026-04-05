@@ -1132,10 +1132,11 @@ document.getElementById('gs-copy-btn').addEventListener('click', () => {
 });
 
 // ===== Google Sheet 綁定 =====
-let gsScriptUrl = '';
+let gsScriptUrl = 'https://us-central1-acs-database-5fb57.cloudfunctions.net/api';
 
 function loadGsUrl() {
-  try { gsScriptUrl = localStorage.getItem('acs_gs_url') || ''; } catch(e) {}
+  // Firebase Functions API - 直接使用固定網址
+  gsScriptUrl = 'https://us-central1-acs-database-5fb57.cloudfunctions.net/api';
   updateGsUI();
 }
 
