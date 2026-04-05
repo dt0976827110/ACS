@@ -41,15 +41,20 @@
     if (!url) return null;
     setSyncStatus('syncing', '同步中…');
     try {
-      const qs = Object.entries(params)
-        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-        .join('&');
-      const res  = await fetch(`${url}?${qs}`);
+      // Firebase Functions 使用 POST 請求
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      });
       const data = await res.json();
       if (data?.success !== false) setSyncStatus('done', '✓ 已同步');
       else setSyncStatus('error', '⚠ 同步失敗');
       return data;
-    } catch {
+    } catch (err) {
+      console.error('API 呼叫錯誤:', err);
       setSyncStatus('error', '⚠ 同步失敗');
       return null;
     }
